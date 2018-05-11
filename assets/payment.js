@@ -301,87 +301,6 @@ $(document).ready(() => {
 		})
 	}
 
-	// ------------------------------------------------------------------------------------------- //
-
-	// Midtrans credit card payment function
-	// Create the card object with the required fields
-	function card () {
-		// Define card details
-		let cardholderName = $('#cardHolderNameInput').val()
-		let cardNumber = $('#cardNumberInput').val()
-		let cardExpiryMonth = $('#cardExpiryDateInput').val().split('/')[0].trim()
-		let cardExpiryYear = $('#cardExpiryDateInput').val().split('/')[1].trim()
-		let cardCvv = $('#cvvInput').val()
-    return {
-      card_number: cardNumber,
-      card_cvv: cardCvv,
-      card_exp_month: cardExpiryMonth,
-      card_exp_year: cardExpiryYear
-    }
-	}
-
-	//Sandbox API URL. TODO: Remove this line when you're ready to go live
-	Veritrans.url = "https://api.sandbox.midtrans.com/v2/token";
-
-	//Set your Midtrans credentials
-	Veritrans.client_key = 'SB-Mid-client-T3q2zUnratuQuFy3';
-
-	/*Create the callback response function.
-	NOTE: This example utilizes JQuery Fancybox.
-	You can use other javascript framework to display 3DS dialog*/
-	function callback(response) {
-    if (response.redirect_url) {
-    	console.log(response)
-      // If 3Dsecure transaction. Open 3Dsecure dialog
-      console.log('Open Dialog 3Dsecure');
-      openDialog(response.redirect_url);
-    } else if (response.status_code == '200') {
-      // success 3d secure or success normal
-      //close 3d secure dialog if any
-      console.log(response)
-      closeDialog();
-      // store token data in input #token_id
-      $("#token-id").val(response.token_id);
-    } else {
-    	console.log(response)
-      // failed request token
-      // Confirm wrong credit card number
-      swal('Warning', 'Wrong credit card number', 'warning')
-      .then(() => {
-      	//close 3d secure dialog if any
-	      closeDialog();
-	      $('#submit-button').removeAttr('disabled');
-	      // Show status message.
-	      $('#message').text(response.status_message);
-	      console.log(JSON.stringify(response));
-      })
-    }
-  }
-
-  // Open 3DSecure dialog box
-  function openDialog(url) {
-    // make sure to load fancybox in a script tag
-    $.fancybox.open({
-      href: url,
-      type: 'iframe',
-      autoSize: false,
-      width: 400,
-      height: 420,
-      closeBtn: false,
-      modal: true
-    });
-  }
-
-  // Close 3DSecure dialog box
-  function closeDialog() {
-    $.fancybox.close();
-  } 
-
-  // Call this function to get midtrans token
-  // Veritrans.token(card, callback);
-
-  // ------------------------------------------------------------------------------------------- //
-
   // Process payment
   processPayment = () => {
   	// Loading overlay start
@@ -398,15 +317,51 @@ $(document).ready(() => {
 	  			data: midtransTransactionObject
 	  		})
 	  		.then((response) => {
+	  			// Define token
+	  			let snapToken = response.data.token
 	  			// Loading overlay stop
 	  			$.LoadingOverlay('hide')
-	  			resolve(response.data)
+	  			// Call snap from Midtrans library snap.js
+	  			snap.pay(snapToken, {
+	  				onSuccess: (result) => {
+	  					console.log('success')
+	  					resolve(result)
+	  				},
+	  				onPending: (result) => {
+	  					console.log('pending')
+	  					resolve(result)
+	  				},
+	  				onError: (result) => {
+	  					console.log('error')
+	  					reject(result)
+	  				},
+	  				onClose: () => {
+	  					console.log('customer close before finishing payment')
+	  					// handle close event here
+	  				}
+	  			})
 	  		})
 	  		.catch((err) => {
-	  			console.log(err)
-	  			reject(err)
+	  			// Loading overlay stop
+	  			$.LoadingOverlay('hide')
+	  			swal('Error', 'Order id has been used, please re-order with different ID', 'error')
+	  			.then(() => {
+	  				window.location.replace(getQueryValue().previousUrl)
+	  			})
 	  		})
 			})
+  	})
+  }
+
+  // Change response url (promise)
+  changeResponseUrl = (responseUrl) => {
+  	return new Promise ((resolve, reject) => {
+  		// Change url to payment finish page
+  		let responseUrlQuery = responseUrl.split('?')[1]
+  		// Put the query into new url
+  		let newUrl = `http://localhost:8080/payment-finish.html?${responseUrlQuery}`
+  		// Resolve the result
+  		resolve(newUrl)
   	})
   }
 
@@ -418,11 +373,17 @@ $(document).ready(() => {
 	// On click button proceed payment
 	$('#btnProceedPayment').click(() => {
 		// Call the process payment function
-		processPayment().
-		then((response) => {
+		processPayment()
+		.then((response) => {
 			console.log(response)
+			// Change response url to our own url function
+			changeResponseUrl(response.finish_redirect_url)
+			.then((newUrl) => {
+				window.location.replace(newUrl)
+			})
 		})
 		.catch((err) => {
+			console.log('masuk bawah error nya')
 			console.log(err)
 		})
 		// Clear all localStorage data
