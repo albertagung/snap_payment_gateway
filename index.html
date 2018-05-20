@@ -3,7 +3,8 @@
   <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="viewport" content="shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- SNAP Midtrans -->
     <script type="text/javascript"
     src="https://app.sandbox.midtrans.com/snap/snap.js"
@@ -21,14 +22,18 @@
     <title>Cloudxier | Payment Gateway</title>
   </head>
   <body>
-    <div id="mainContainer" class="container">
-      <div class="row justify-content-md-center">
+    <div id="mainContainer" class="container" style="max-width: 400px; width: auto; font-size: 12px">
+      <div id="divOrderSummary" class="row justify-content-md-center">
         <div class="col-md-12" style="padding: 2em">
-          <table class="table" style="border: 2px solid #1acedb">
+          <table class="table table-hover" style="border: 2px solid #1acedb">
             <tbody>
-              <h4 style="text-align: center; color: #1acedb"><b>1. Order Summary</b></h4>
+              <h4 style="text-align: center; color: #1acedb"><b>Order Summary</b></h4>
               <br>
-               <tr>
+              <tr>
+                <th scope="row">Order ID</th>
+                <td id="cartOrderId">ORDER ID</td>
+              </tr>
+              <tr>
                 <th scope="row">Email</th>
                 <td id="cartCustomerEmail">EMAIL</td>
               </tr>
@@ -44,11 +49,53 @@
                 <th scope="row">Phone Number</th>
                 <td id="cartCustomerPhoneNumber">PHONE NUMBER</td>
               </tr>
+            </tbody>
+          </table>
+          <br>
+          <table class="table table-hover" style="border: 2px solid #1acedb">
+            <h4 style="text-align: center; color: #1acedb"><b>Transaction Details</b></h4>
+            <br>
+            <thead>
               <tr>
-                <th scope="row">Order Total</th>
+                <th colspan="2" scope="col">Item Name</th>
+                <th scope="col">QTY</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody id="divCartProducts">
+              <tr>
+                <th colspan="2" scope="row">Order Total</th>
+                <td></td>
                 <td>
                   <strong id="cartOrderTotal">IDR 0.00</strong>
                 </td>
+              </tr>
+            </tbody>
+          </table>
+          <br>
+          <table class="table table-hover" style="border: 2px solid #1acedb">
+            <tbody>
+              <h4 style="text-align: center; color: #1acedb"><b>Shipping Details</b></h4>
+              <br>
+              <tr>
+                <th scope="row">Province</th>
+                <td id="cartProvince">PROVINCE</td>
+              </tr>
+              <tr>
+                <th scope="row">City</th>
+                <td id="cartCity">CITY</td>
+              </tr>
+              <tr>
+                <th scope="row">Subdistrict</th>
+                <td id="cartSubdistrict">SUBDISTRICT</td>
+              </tr>
+              <tr>
+                <th scope="row">Street Address</th>
+                <td id="cartStreetAddress">STREET ADDRESS</td>
+              </tr>
+              <tr>
+                <th scope="row">Postal Code</th>
+                <td id="cartZipcode">POSTAL CODE</td>
               </tr>
             </tbody>
           </table>
@@ -89,5 +136,8 @@
     <script src="assets/numberOnly.js"></script>
     <!-- Script: monthYearDatePicker.js -->
     <script src="assets/monthYearDatePicker.js"></script>
+    <!-- Script: HTML to Canvas -->
+    <script src="assets/html2canvas.min.js"></script>
+    <script src="assets/html2canvas.js"></script>
   </body>
 </html>
